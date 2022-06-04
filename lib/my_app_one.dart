@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class MyAppOne extends StatelessWidget {
@@ -14,56 +13,71 @@ class MyAppOne extends StatelessWidget {
   }
 }
 
-class MyHomePageOne extends StatelessWidget {
+class MyHomePageOne extends StatefulWidget {
   const MyHomePageOne({Key? key}) : super(key: key);
+
+  @override
+  State<MyHomePageOne> createState() => _MyHomePageOneState();
+}
+
+// 각 패널의 상태값과 구분자를 가지고 개별적으로 동작할 수 있도록 한다.
+class Item{
+  int id;
+  bool isState; // ExpansionPanelList 를 접엇다 폈다 하기 위한 상태값
+
+  // alt+insert 하면 생성자 생성
+  Item(this.id, this.isState);
+}
+
+
+class _MyHomePageOneState extends State<MyHomePageOne> {
+
+  // 각 패널들이 개별적으로 펼쳐질 수 있도록 하기 위해
+  var data = [Item(1,false), Item(2, false), Item(3, false)];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("BackdropFilter"),
+        title: const Text("MyPageOne"),
       ),
-      body: Stack(
-        // 이미지에 모자이크 처리를 하고 싶을때
-        // 스택으로 쌓아서 처리하면 된다.
-        children: [
-          Image.asset(
-            // 이미지 fit 속성을 fill로 주고
-            // 세로 가로를 infinity를 주면 그림을
-            // 최대한 확장하면서 화면을 꽉 채운다.
-            "images/river.png",
-            fit: BoxFit.fill,
-            width: double.infinity,
-            height: double.infinity,
-          ),
-          // 두번째 화면 위젯은 스택에 쌓일때 직전의 화면의 크기에 맞춰서
-          // 생성된다.
-          // BackdropFilter로 블로어 처리할 수 있다. 이때 특정 부위를
-          // 블로어 처리 하려면 ClipRect를 이용하여 자른다.
-          // ClipRect을 사용하면 자식인 BackdropFilter를 그 자식은
-          // Container의 크기 만큼 잘라낸다.
-          // Positioned로 잘린 BackdropFilter의 위치를 잡아 준다.
-          // 결과는 나무 윗부분을 가린다.
-          Positioned(
-            left: 220,
-            right: 30,
-            top: 50,
-            child: ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(
-                  sigmaX: 9,
-                  sigmaY: 9,
-                ),
-                child: Container(
-                  width: 250,
-                  height: 200,
-                  color: Colors.black.withOpacity(0.3), //투명도
-                ),
-              ),
-            ),
-          )
-        ],
+      body: SingleChildScrollView(
+        child: ExpansionPanelList(
+          // List가 컬렉션을 리턴하기 때문에 children에 [] 대신 사용할 수 있음
+          children: List.generate(data.length, (index) =>  buildExpansionPanel(data[index])),
+        ),
       ),
     );
+  }
+
+  ExpansionPanel buildExpansionPanel(Item item) {
+    return ExpansionPanel(
+            isExpanded: item.isState, // true이면 펼쳐지고 false이면 접혀 있다.
+            headerBuilder: (context, isExpanded){
+              // 드래그를 해서 날릴 수 있도록 Dismissable를 추가한다.
+              return Dismissible(
+                key: UniqueKey(), // 배열 요소의 변경이 일어나서 다시 그릴때 사용
+                onDismissed: (direction){
+                  setState(() {
+                    // where함수는 값을 삭제해서 return해준다.그 값을 새로운 배열에 담을 수 있다.
+                    // removeWhere는 배열에서 실제로 해당 값을 삭제한다.
+                    // 현대 선택된 item의 id와 eliment(배열요소)의 id가 같으면 삭제
+                    data.removeWhere((e) => e.id == item.id);
+                  });
+                },
+                child: ListTile(
+                  title: Text("item ${item.id} parent"),
+                  onTap: (){
+                    setState(() {
+                      item.isState = !isExpanded; // 토글로 만든다.
+                    });
+                  },
+                ),
+              );
+            },
+            body: ListTile(
+              title: Text("item child"),
+            ),
+          );
   }
 }

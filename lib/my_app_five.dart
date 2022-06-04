@@ -3,12 +3,10 @@ import 'package:flutter/material.dart';
 class MyAppFive extends StatelessWidget {
   const MyAppFive({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
       home: MyHomePageFive(),
     );
   }
@@ -21,44 +19,55 @@ class MyHomePageFive extends StatefulWidget {
   State<MyHomePageFive> createState() => _MyHomePageFiveState();
 }
 
-class _MyHomePageFiveState extends State<MyHomePageFive> {
-  bool isLoading = true;
+class _MyHomePageFiveState extends State<MyHomePageFive>
+    with SingleTickerProviderStateMixin {
+  // late : null을 허용하지 않지만 초기화를 늦추고 싶을 때 사용
+  // late 역시 코드 작성 시 초기화 전 해당 변수를 사용한다면 에러가 발생함.
+  // this는 객체 생성전에는 사용할 수 없으나 SingleTickerProviderStateMixin을
+  // 사용하면 인식한다.
+  late final TabController _tabController =
+      TabController(length: 2, vsync: this);
 
-  // 앱 구동 시 최초에 실행 1번 실행되기 때문에
-  // 서버에서 데이터를 다운로드 받을때 사용하면 좋다.
-  @override
-  void initState() {
-    debugPrint("initState()");
-    Future.delayed(
-      const Duration(seconds: 3),
-      // 3초가 지나면 함수 실행
-      () {
-        debugPrint("테스트를 위한 다운로드 완료");
-        // 로딩이 끝났으므로 다시 그려주면서 false 로 셋팅
-        setState(() {
-          isLoading = false;
-          // isLoading 값이 바뀌면 관련 위젯들만 다시 그려줌
-        });
-      },
-    );
-  }
-
+  // 또는 initState()함수를 이용하여 초기화(객체가 생성되므로)하는
+  // 함수 body에 사용하면 인식한다.
+  // late final TabController _tabController;
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _tabController =
+  //       TabController(length: 2, vsync: this);
+  // }
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text("Card View"),
-        ),
-        body: Center(
-          // isLoading이 true이면 (데이터 로딩 중이면 Progress)
-          child: isLoading
-              ? const CircularProgressIndicator(
-                  backgroundColor: Colors.red,
-                  strokeWidth: 5,
-                )
-              : const Text("다운로드 완료됨 . 그림 그리다"),
-        ),
+    return Scaffold(
+      body: Column(
+        children: [
+          // Container로 위치를 잡아준다.
+          Container(
+            color: Colors.red,
+            height: 350,
+          ),
+          TabBar(
+            labelColor: Colors.blue,
+            unselectedLabelColor: Colors.black,
+            controller: _tabController,
+            tabs: const [
+              Tab(icon: Icon(Icons.access_alarm), text: "사진1",),
+              Tab(icon: Icon(Icons.access_alarm), child: Text("사진2"),),
+            ],
+          ),
+          // Container높이 이외에 TabBarView 높이를 줘야 하는데 이때에는
+          // 정확한 수를 입력하기 어려기 때문에 Expanded를 사용
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                Image.network("https://placeimg.com/480/280/any"),
+                Image.network("https://placeimg.com/680/420/any"),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
