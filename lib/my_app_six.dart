@@ -1,45 +1,66 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
-class MyAppSix extends StatelessWidget {
-  const MyAppSix({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'Flutter Demo',
-      home: MyHomePageSix(),
-    );
-  }
-}
-
-class MyHomePageSix extends StatelessWidget {
+class MyHomePageSix extends StatefulWidget {
   const MyHomePageSix({Key? key}) : super(key: key);
 
   @override
+  State<MyHomePageSix> createState() => _MyHomePageSixState();
+}
+
+class _MyHomePageSixState extends State<MyHomePageSix> {
+  double _boxOpacity = 1.0;
+
+  @override
+  void initState() {
+    super.initState();
+    // 시작 후 3초 뒤 투명 효과
+    Future.delayed(Duration(seconds: 3),()=>{
+      change()
+    });
+  }
+
+  void change(){
+    setState(() {
+      _boxOpacity = 0.2;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-          body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            height: 280,
-            width: 120,
-            color: Colors.orange,
-            child: FittedBox(
-              fit: BoxFit.cover, // 작은 이미지를 크게 채우는 곳에 사용
-              // 이미지를 네트워크로 불러오기 (100/100은 사이즈)
-              child: Image.network("https://placeimg.com/100/100/any"),
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: (){
+                setState(() {
+                  _boxOpacity = 1.0;
+                });
+              }, child: Text("원래상태로"),
             ),
-          ),
-          // 큰 이미지를 작은 곳에 맞추려면 container의 크기로 조절한다.
-          Container(
-              height: 200,
-              width: 200,
-              // 이미지를 네트워크로 불러오기 (640/480은 사이즈)
-              child: Image.network("https://placeimg.com/640/480/any")),
-        ],
-      )),
+            ElevatedButton(
+              onPressed: (){
+                setState(() {
+                  change();
+                });
+              }, child: Text("투명 효과"),
+            ),
+            AnimatedOpacity(
+              opacity: _boxOpacity, // 불투명도 , 1 이 max
+              duration: Duration(seconds: 3),
+              child: Container(
+                height: 200,
+                width: 200,
+                color: Colors.blue,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -1,38 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 
-class MyAppEight extends StatelessWidget {
-  const MyAppEight({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'Flutter Demo',
-      home: MyHomePageEight(),
-    );
-  }
-}
-
-class MyHomePageEight extends StatelessWidget {
+class MyHomePageEight extends StatefulWidget {
   const MyHomePageEight({Key? key}) : super(key: key);
 
   @override
+  State<MyHomePageEight> createState() => _MyHomePageEightState();
+}
+
+class _MyHomePageEightState extends State<MyHomePageEight> {
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: SafeArea(
-          child: PageView(  // TabBar업이 스와이핑이 가능함 (자식 위젯이 하나의 페이지가 됨)
-            children: [
-              Container(
-                color: Colors.green,
+      body: Center(
+        child: SizedBox(
+          width: 250.0,
+          child: AnimatedTextKit(
+            // FadeAnimatedText  와 ScaleAnimatedText 을 섞어 쓸 수 있다.
+            // 순차적으로 보여준다
+            animatedTexts: [
+              FadeAnimatedText(
+                '1 FadeAnimated',
+                textStyle: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 32,
+                ),
               ),
-              Container(
-                color: Colors.orange,
-              ),
-              Container(
-                color: Colors.blue,
+              ScaleAnimatedText(
+                '2 ScaleAnimated',
+                textStyle: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Canterbury',
+                ),
               ),
             ],
+            onTap: () {
+              print("Tap Event");
+            },
+            //totalRepeatCount: 10,    // 10회 반복
+            repeatForever: true,       // 무한 반복
+            pause: const Duration(seconds: 1),      // 1초 간격
+            displayFullTextOnTap: true,
+            stopPauseOnTap: true,
           ),
         ),
+      ),
     );
   }
 }

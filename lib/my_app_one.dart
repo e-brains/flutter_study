@@ -1,18 +1,5 @@
 import 'package:flutter/material.dart';
 
-class MyAppOne extends StatelessWidget {
-  const MyAppOne({Key? key}) : super(key: key);
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'Flutter Demo',
-      home: MyHomePageOne(),
-    );
-  }
-}
-
 class MyHomePageOne extends StatefulWidget {
   const MyHomePageOne({Key? key}) : super(key: key);
 
@@ -20,64 +7,49 @@ class MyHomePageOne extends StatefulWidget {
   State<MyHomePageOne> createState() => _MyHomePageOneState();
 }
 
-// 각 패널의 상태값과 구분자를 가지고 개별적으로 동작할 수 있도록 한다.
-class Item{
-  int id;
-  bool isState; // ExpansionPanelList 를 접엇다 폈다 하기 위한 상태값
-
-  // alt+insert 하면 생성자 생성
-  Item(this.id, this.isState);
-}
-
-
 class _MyHomePageOneState extends State<MyHomePageOne> {
 
-  // 각 패널들이 개별적으로 펼쳐질 수 있도록 하기 위해
-  var data = [Item(1,false), Item(2, false), Item(3, false)];
+  late Size size;
+  bool isOpen = false;
 
   @override
   Widget build(BuildContext context) {
+    // 미디어의 크기를 받아온다.
+    size = MediaQuery.of(context).size;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("MyPageOne"),
+        // 버튼을 만들어서 isOpen의 값을 조정한다.
+        actions: [
+          InkWell(
+            child: Icon(Icons.compare_arrows),
+            onTap: (){
+              setState(() {
+                isOpen = !isOpen;  // 토글 버튼으로 만듬
+              });
+            },
+          )
+        ],
       ),
-      body: SingleChildScrollView(
-        child: ExpansionPanelList(
-          // List가 컬렉션을 리턴하기 때문에 children에 [] 대신 사용할 수 있음
-          children: List.generate(data.length, (index) =>  buildExpansionPanel(data[index])),
-        ),
+      body: Stack(   // 화면에서 위젯을 겹쳐서 표현하기 위해 사용
+        children: [
+          Center(
+            child: Text("Hello"),
+          ),
+          AnimatedContainer(
+            curve: Curves.easeInOutBack, // 움직이는 형태 설정
+          duration: Duration(seconds: 2),
+            height: double.infinity,  // 최대 크기
+            width: size.width * (2/3),  // 화면에서 차지하는 가로사이즈
+            color: Colors.blue,
+            // x축의 값만 조정해서 가로로 움직이도록 함
+            // isOpen이 false이면 size.width는 최대 크기 이기 때문에 화면의
+            // 맨 오른쪽으로 가서 숨어버림 화면에 안보임
+            // true이면 좌측에서 1/3 자리에 위치
+            transform: Matrix4.translationValues(isOpen?size.width*(1/3):size.width, 0, 0),
+          ),
+        ],
       ),
     );
-  }
-
-  ExpansionPanel buildExpansionPanel(Item item) {
-    return ExpansionPanel(
-            isExpanded: item.isState, // true이면 펼쳐지고 false이면 접혀 있다.
-            headerBuilder: (context, isExpanded){
-              // 드래그를 해서 날릴 수 있도록 Dismissable를 추가한다.
-              return Dismissible(
-                key: UniqueKey(), // 배열 요소의 변경이 일어나서 다시 그릴때 사용
-                onDismissed: (direction){
-                  setState(() {
-                    // where함수는 값을 삭제해서 return해준다.그 값을 새로운 배열에 담을 수 있다.
-                    // removeWhere는 배열에서 실제로 해당 값을 삭제한다.
-                    // 현대 선택된 item의 id와 eliment(배열요소)의 id가 같으면 삭제
-                    data.removeWhere((e) => e.id == item.id);
-                  });
-                },
-                child: ListTile(
-                  title: Text("item ${item.id} parent"),
-                  onTap: (){
-                    setState(() {
-                      item.isState = !isExpanded; // 토글로 만든다.
-                    });
-                  },
-                ),
-              );
-            },
-            body: ListTile(
-              title: Text("item child"),
-            ),
-          );
   }
 }

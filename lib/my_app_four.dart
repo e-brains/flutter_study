@@ -1,45 +1,60 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
-class MyAppFour extends StatelessWidget {
-  const MyAppFour({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      home: MyHomePageFour(),
-    );
-  }
-}
-
-class MyHomePageFour extends StatelessWidget {
+class MyHomePageFour extends StatefulWidget {
   const MyHomePageFour({Key? key}) : super(key: key);
 
   @override
+  State<MyHomePageFour> createState() => _MyHomePageFourState();
+}
+
+class _MyHomePageFourState extends State<MyHomePageFour>
+    with SingleTickerProviderStateMixin {
+
+  double radian = 0;
+  // 지속적으로 작동하고 싶을때
+  // 단점 setState()를 사용하면 Build가 계속 호출되기 때문에
+  // 비효율적이다.
+  @override
+  void setState(VoidCallback fn) {
+    super.setState(fn);
+    Timer.periodic(Duration(microseconds: 1000), (timer) {
+      setState(() {
+        radian = radian + pi/10;
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-          body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            height: 280,
-            width: 120,
-            color: Colors.orange,
-            child: FittedBox(
-              fit: BoxFit.cover, // 작은 이미지를 크게 채우는 곳에 사용
-              // 이미지를 네트워크로 불러오기 (100/100은 사이즈)
-              child: Image.network("https://placeimg.com/100/100/any"),
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // 버튼 누를때 마다 60도씩 돌아가게 한다.
+            ElevatedButton(
+              onPressed: (){
+                setState(() {
+                  radian = radian + pi/10;  // 90도씩 돌아가게한다.
+                });
+              },
+              child: Text("버튼"),
             ),
-          ),
-          // 큰 이미지를 작은 곳에 맞추려면 container의 크기로 조절한다.
-          Container(
-              height: 200,
-              width: 200,
-              // 이미지를 네트워크로 불러오기 (640/480은 사이즈)
-              child: Image.network("https://placeimg.com/640/480/any")),
-        ],
-      )),
+            Transform.rotate(
+              angle: radian, // 얼마나 돌릴 것인지
+              child: Container(
+                height: 100,
+                width: 100,
+                color: Colors.blue,
+                child: Text("왼쪽모서리"),
+              ),
+            )
+          ],
+        ),
+      ),
     );
   }
 }
